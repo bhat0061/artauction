@@ -1,0 +1,7 @@
+INDEX VERSION 1.3+C:\Users\Archit\Documents\art_auction\.metadata\.plugins\org.eclipse.wst.jsdt.core\indexes
+3081921871.index
+184419767.index
+2226724705.index
+3734828592.index
+3449984365.index
+772813634.index

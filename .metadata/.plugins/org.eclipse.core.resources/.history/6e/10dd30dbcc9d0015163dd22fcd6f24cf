@@ -1,0 +1,138 @@
+package Data;
+import java.sql.ResultSet;
+import java.sql.Timestamp;
+/**
+ * This class is used as a data object for Bid on an Auction
+ * */
+public class Bid {
+	private int id;
+	private int accountid;
+	private int itemid;
+	private float value;
+	private String userName;
+	private String name;
+	
+	/**
+	 * This is the constructor to create a bid and add respective values to the fields
+	 * */
+	public Bid(ResultSet rs){
+		try{
+			setId(rs.getInt("id"));
+			setItemid(rs.getInt("itemid"));
+			setAccountid(rs.getInt("accountid"));
+			setValue(rs.getFloat("bidvalue"));
+			setCreatedTimeStamp(rs.getTimestamp("createdtimestamp"));
+		}
+		catch(Exception ex){}
+	}	
+	/**
+	 * Gets the name
+	 * @return name */
+	public String getName() {
+		return name;
+	}
+	
+	/**
+	 * Sets the name
+	 * @return void
+	 * @param String name*/
+	
+	public void setName(String name) {
+		this.name = name;
+	}
+	/**
+	 * gets the username of the bidder
+	 * @return String userName
+	 */
+
+	public String getUserName() {
+		return userName;
+	}
+	/**
+	 * Sets the userName of the bidder
+	 * @return String userName
+	   */
+	
+	public void setUserName(String userName) {
+		this.userName = userName;
+	}
+	
+	
+	private Timestamp createdTimeStamp;
+	
+	/**
+	 * Gets the created time stamp
+	 * @return TimeStamp 
+	 * */
+	
+	public Timestamp getCreatedTimeStamp() {
+		return createdTimeStamp;
+	}
+	
+	/**
+	 * Sets the createdTimeStamp
+	 * @param TimeStamp
+	 * */
+	public void setCreatedTimeStamp(Timestamp timestamp) {
+		this.createdTimeStamp = timestamp;
+	}
+	
+	/**
+	 *Gets the Id of the Bid
+	 *@return int id 
+	 * */
+	
+	public int getId() {
+		return id;
+	}
+	
+	/**
+	 * Sets the Id of the Bid
+	 * @param int id
+	 * */
+	public void setId(int id) {
+		this.id = id;
+	}
+	
+	/**
+	 * Gets the account id of the Bidder
+	 * @return int accountId
+	 * */
+	public int getAccountid() {
+		return accountid;
+	}
+	
+	/**
+	 * Sets the account id of the bidder
+	 * @param int accountId
+	 * */
+	public void setAccountid(int accountid) {
+		this.accountid = accountid;
+	}
+	
+	/**
+	 * Gets the itemId on which the bid is to be placed
+	 * @return int itemId
+	 * */
+	public int getItemid() {
+		return itemid;
+	}
+	
+	/**
+	 * Sets the Item Id
+	 * @param int ItemID
+	 * */
+	public void setItemid(int itemid) {
+		this.itemid = itemid;
+	}
+	
+	/**
+	 * 
+	 * */
+	public float getValue() {
+		return value;
+	}
+	public void setValue(float value) {
+		this.value = value;
+	}
+}

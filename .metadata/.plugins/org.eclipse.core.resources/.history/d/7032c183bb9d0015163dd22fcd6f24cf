@@ -1,0 +1,94 @@
+package Handler;
+
+import java.util.Properties;
+
+import javax.mail.Message;
+import javax.mail.PasswordAuthentication;
+import javax.mail.Session;
+import javax.mail.Transport;
+import javax.mail.internet.InternetAddress;
+import javax.mail.internet.MimeMessage;
+
+/**
+ * @author Archit
+ * This class is used to handle the email system of the project. This class uses Session and Properties to complete the task.
+ */
+public class MailHandler {
+
+	/** SendEmail method is used to send emails to the winner and owner of the auction using the SMTP port
+	 *  @param String winnerEmail, String auctioneerEmail, String subject, String message.
+	 *  @return void
+	 * 
+	 * */	public static void SendEmail(String winnerEmail, String auctioneerEmail, String subject,
+			String message) {
+
+		final String fromEmail = "auctionsite11@gmail.com"; /*this is the email address of the sender, since we have only one email, we make it final*/
+
+		Properties props = System.getProperties();/*creates a new object props of type properties */
+		props.put("mail.smtp.host", "mail.smtp2go.com");
+		props.put("mail.smtp.auth", "true");
+		props.put("mail.smtp.port", "2525");
+		props.put("mail.smtp.starttls.enable", "true");
+
+		Session mailSession = Session.getInstance(props,
+				new javax.mail.Authenticator() {
+					protected PasswordAuthentication getPasswordAuthentication() {
+						return new PasswordAuthentication(
+								fromEmail, "auctionlist");
+					}
+				}); // for the winner
+
+		Session mailSession1 = Session.getInstance(props,
+				new javax.mail.Authenticator() {
+					protected PasswordAuthentication getPasswordAuthentication() {
+						return new PasswordAuthentication(
+								fromEmail, "auctionlist");
+					}
+				}); // for the owner
+		//Session session = Session.getDefaultInstance(props);
+
+		try {
+
+			Message messageForOwner = new MimeMessage(mailSession);
+			messageForOwner.setFrom(new InternetAddress(fromEmail));
+			messageForOwner.setRecipient(Message.RecipientType.TO, new InternetAddress(auctioneerEmail)); // Owner
+			messageForOwner.setSubject("Your Auction Ended");
+
+			
+
+			if(winnerEmail != null)
+			{
+				messageForOwner
+						.setText(String.format("Congratulations %s!! Your Auction has ended. The winner is %s. The winner has been notified",auctioneerEmail, winnerEmail));
+				
+				// Create a default MimeMessage object.
+				Message messageForWinner = new MimeMessage(mailSession1);
+				messageForWinner.setFrom(new InternetAddress(fromEmail));
+				messageForWinner.setRecipients(Message.RecipientType.TO,
+						InternetAddress.parse(winnerEmail)); // winnner
+				
+				// Set Subject: header field
+				messageForWinner.setSubject(subject);
+
+				// Now set the actual message
+				messageForWinner
+						.setText(String.format("Congratulations %s!! You Won the Auction. Please visit the website auctionList :D", winnerEmail));
+
+				// Send message
+				Transport.send(messageForWinner);
+			}
+			else
+			{
+				messageForOwner
+						.setText(String.format("Sorry %s!! Your Auction has ended and there wasn't any bidders. :(",auctioneerEmail));
+				
+			}
+			Transport.send(messageForOwner);
+			System.out.println("Sent message successfully....");
+
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+
+	}
+}

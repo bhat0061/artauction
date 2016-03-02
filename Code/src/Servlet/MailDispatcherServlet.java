@@ -1,0 +1,209 @@
+package Servlet;
+
+import java.io.IOException;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.Timestamp;
+import java.util.Date;
+import java.util.ResourceBundle;
+
+import javax.servlet.RequestDispatcher;
+import javax.servlet.ServletException;
+import javax.servlet.http.HttpServlet;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.HttpSession;
+
+import Data.Account;
+import Data.DutchAuction;
+import Data.EnglishAuction;
+import Handler.DatabaseHandler;
+import Handler.MailHandler;
+
+/**
+ * This servlet runs when the any user logs in and this servlet checks for the ended auctions and calls mail Handler to send the emails to
+ * winner and the owner  
+ * This class extends httpServlet to use the properties of the HttpServlet class
+ * @author Archit
+ * @author Shawn Pottle
+ */
+ 
+public class MailDispatcherServlet extends HttpServlet {	
+ 
+	private static final long serialVersionUID = 1L;
+
+	/**
+	 * This method is used to retrieve information from the servers
+	 * @param request,response
+	 * @throws servletException , IOException
+	 * @return void
+	 * 
+	 * */
+public void doGet(HttpServletRequest request, HttpServletResponse response  )throws ServletException, IOException 
+{
+		HttpSession session = request.getSession();
+		Connection englishAuctionConnection = null;
+		PreparedStatement englishAuctionPST = null;
+		
+		Connection dutchAuctionConnection = null;
+	PreparedStatement dutchAuctionPST = null;
+	try
+	{
+			englishAuctionConnection = DatabaseHandler.getNewSQLConnection();
+			englishAuctionPST =  englishAuctionConnection.prepareStatement("Select * from EnglishAuction where isactive=true");
+			ResultSet englishAuctionsToCheck = englishAuctionPST.executeQuery();
+		while(englishAuctionsToCheck.next())
+		{
+			Connection updateConnection = null;
+			PreparedStatement updatePST = null;
+			
+			Connection winnerConnection = null;
+			PreparedStatement winnerPST = null;
+				
+			Connection notificationConnection = null;
+			PreparedStatement notificationPST = null;
+				
+				
+				EnglishAuction auction = new EnglishAuction(englishAuctionsToCheck);
+				if(!auction.isNotified())
+				{
+					Timestamp now = new Timestamp(new Date().getTime());
+					if(auction.getClosingTimeStamp().before(now))
+					{
+						updateConnection = DatabaseHandler.getNewSQLConnection();
+						updatePST =  updateConnection.prepareStatement("UPDATE EnglishAuction SET isactive=false WHERE id=?");
+						updatePST.setInt(1, auction.getId());
+						updatePST.execute();
+						
+						DatabaseHandler.closeConnection(updateConnection, null, updatePST);
+
+						winnerConnection = DatabaseHandler.getNewSQLConnection();
+						winnerPST =  winnerConnection.prepareStatement("Select * from Account WHERE id=?");
+						winnerPST.setInt(1, auction.getAccountid());
+						ResultSet auctioneerAccount = winnerPST.executeQuery(); 
+						auctioneerAccount.next();
+						String auctioneerEmail = new Account(auctioneerAccount).getEmail();
+						
+						notificationConnection = DatabaseHandler.getNewSQLConnection();
+						notificationPST =  notificationConnection.prepareStatement("Select * from artAuction.Bid where itemid=? order by bidvalue desc limit 1");
+						notificationPST.setInt(1, auction.getId());
+						ResultSet winnerAccount = notificationPST.executeQuery();
+						winnerAccount.next();
+						String winnerEmail;
+						String message;
+						String subject;
+						if(winnerAccount.wasNull())
+						{
+							winnerEmail = null;
+							message = "No sale made.";
+							subject = "No sale.";
+						}
+						else
+						{
+							winnerEmail = new Account(winnerAccount).getEmail();
+							message = "CONGRATS!";
+							subject = "WIN";
+						}
+						MailHandler.SendEmail(winnerEmail, auctioneerEmail, subject, message);
+						DatabaseHandler.closeConnection(winnerConnection,  winnerAccount, winnerPST);
+						notificationConnection = DatabaseHandler.getNewSQLConnection();
+						notificationPST = notificationConnection.prepareStatement("UPDATE EnglishAuction SET isnotified=true WHERE id=?");
+						notificationPST.setInt(1, auction.getId());
+						notificationPST.execute();
+					
+						DatabaseHandler.closeConnection(notificationConnection, null, notificationPST);
+					}
+				}
+			}
+			
+			//Query the database for all Dutch auction that are inactive
+			dutchAuctionConnection = DatabaseHandler.getNewSQLConnection();
+			dutchAuctionPST = dutchAuctionConnection.prepareStatement("Select * from DutchAuction where isactive=false");
+			ResultSet dutchAuctionsToCheck = dutchAuctionPST.executeQuery();
+			//Loop through all the results
+			while(dutchAuctionsToCheck.next())
+			{
+				Connection winnerConnection = null;
+				PreparedStatement winnerPST = null;
+				
+				Connection auctioneerConnection = null;
+				PreparedStatement auctioneerPST = null;
+				
+				Connection notificationConnection = null;
+				PreparedStatement notificationPST = null;
+				
+				DutchAuction auction = new DutchAuction(dutchAuctionsToCheck);
+				//Check to see if the Dutch auction has been notified
+				//If yes
+				if(!auction.isNotified())
+				{
+					//Get the winners email
+					winnerConnection = DatabaseHandler.getNewSQLConnection();
+					winnerPST = winnerConnection.prepareStatement("Select * from Account WHERE id=?");
+					winnerPST.setInt(1, auction.getBidderid());
+					ResultSet winnerAccount = winnerPST.executeQuery(); 
+					winnerAccount.next();
+					String winnerEmail = new Account(winnerAccount).getEmail();
+					
+					DatabaseHandler.closeConnection(winnerConnection,  null, winnerPST);
+					
+					//Get the auctioneers email
+					auctioneerConnection = DatabaseHandler.getNewSQLConnection();
+					auctioneerPST = auctioneerConnection.prepareStatement("Select * from Account WHERE id=?");
+					auctioneerPST.setInt(1, auction.getAccountid());
+					ResultSet auctioneerAccount = auctioneerPST.executeQuery();
+					auctioneerAccount.next();
+					String auctioneerEmail;
+					String message;
+					String subject;
+					if(auctioneerAccount.wasNull())
+					{
+						auctioneerEmail = null;
+						message = "No sale made.";
+						subject = "No sale.";
+					}
+					else
+					{
+						auctioneerEmail = new Account(auctioneerAccount).getEmail();
+						message = "CONGRATS!";
+						subject = "WIN";
+					}
+					
+					//Send the email via MailHandler
+					MailHandler.SendEmail(winnerEmail, auctioneerEmail, subject, message);
+					DatabaseHandler.closeConnection(auctioneerConnection, null, auctioneerPST);
+					
+					//Set the Dutch auction as notified
+					notificationConnection = DatabaseHandler.getNewSQLConnection();
+					notificationPST = notificationConnection.prepareStatement("UPDATE DutchAuction SET isnotified=true WHERE id=?");
+					notificationPST.setInt(1, auction.getId());
+					notificationPST.execute();
+				}
+			}
+			//Close all used connections
+			DatabaseHandler.closeConnection(englishAuctionConnection, null, englishAuctionPST);
+			DatabaseHandler.closeConnection(dutchAuctionConnection, null, dutchAuctionPST);
+		}
+		catch(Exception e)
+		{
+			e.printStackTrace();
+		}finally{
+			DatabaseHandler.closeConnection(englishAuctionConnection, null, englishAuctionPST);
+		}
+		
+		//Get the current viewing language
+		String lang;
+		if(session==null || session.getAttribute("language") == null )
+			lang = "Language.lang_en_ca";
+		else
+			lang = session.getAttribute("language").toString();
+		ResourceBundle resource = ResourceBundle.getBundle(lang);
+		//Redirect to the auction list servlet
+	 	session.setAttribute("redirectLink", "/ArtAuction/AuctionListServlet");
+		session.setAttribute("redirectMsg", resource.getString("redirectlogin"));
+		RequestDispatcher rd = request.getRequestDispatcher("redirect.jsp");
+		rd.forward(request, response);
+	
+	}
+}

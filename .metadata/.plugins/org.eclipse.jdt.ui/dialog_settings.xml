@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<section name="Workbench">
+	<item value="C:\Users\Archit\Downloads" key="org.eclipse.jdt.ui.lastextjar"/>
+	<section name="javadoc">
+		<item value="public" key="access"/>
+		<item value="false" key="noindex"/>
+		<item value="C:\Users\Archit\Documents\art_auction\Code\javadoc.xml" key="antpath"/>
+		<item value="false" key="nodeprecatedlist"/>
+		<item value="true" key="use"/>
+		<item value="true" key="author"/>
+		<item value="false" key="nodeprecated"/>
+		<item value="false" key="nonavbar"/>
+		<item value="" key="docletpath"/>
+		<item value="C:\Program Files\Java\jdk1.8.0_25\bin\javadoc.exe;C:\Program Files\Java\jre1.8.0_31\lib\javadoc" key="javadoc_command_history"/>
+		<item value="1.5" key="source"/>
+		<item value="true" key="version"/>
+		<item value="" key="docletname"/>
+		<item value="true" key="splitindex"/>
+		<item value="true" key="fromStandard"/>
+		<item value="false" key="notree"/>
+		<item value="C:\Users\Archit\Documents\art_auction\Code\doc" key="destdir"/>
+		<item value="false" key="openinbrowser"/>
+		<section name="projects">
+			<section name="Servers">
+				<item value="C:\Users\Archit\Documents\art_auction\Servers\javadoc.xml" key="antpath"/>
+				<item value="C:\Users\Archit\Documents\art_auction\Servers\doc" key="destdir"/>
+				<item value="" key="href"/>
+			</section>
+			<section name="RemoteSystemsTempFiles">
+				<item value="C:\Users\Archit\Documents\art_auction\RemoteSystemsTempFiles\javadoc.xml" key="antpath"/>
+				<item value="C:\Users\Archit\Documents\art_auction\RemoteSystemsTempFiles\doc" key="destdir"/>
+				<item value="" key="href"/>
+			</section>
+			<section name="Code">
+				<item value="C:\Users\Archit\Documents\art_auction\Code\javadoc.xml" key="antpath"/>
+				<item value="C:\Users\Archit\Documents\art_auction\Code\doc" key="destdir"/>
+				<item value="" key="href"/>
+			</section>
+		</section>
+	</section>
+	<section name="ClasspathContainerSelectionPage">
+		<item value="3" key="index"/>
+	</section>
+	<section name="quick_assist_proposal_size">
+	</section>
+	<section name="BuildPathsPropertyPage">
+		<item value="2" key="pageIndex"/>
+	</section>
+	<section name="JavadocWizardDialog">
+		<item value="616" key="DIALOG_WIDTH"/>
+		<item value="1|Segoe UI|9.0|0|WINDOWS|1|-12|0|0|0|400|0|0|0|1|0|0|0|0|Segoe UI" key="DIALOG_FONT_NAME"/>
+		<item value="567" key="DIALOG_HEIGHT"/>
+		<item value="383" key="DIALOG_X_ORIGIN"/>
+		<item value="8" key="DIALOG_Y_ORIGIN"/>
+	</section>
+	<section name="completion_proposal_size">
+	</section>
+	<section name="JavaElementSearchActions">
+	</section>
+</section>

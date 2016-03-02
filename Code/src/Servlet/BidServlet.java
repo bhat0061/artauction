@@ -1,0 +1,94 @@
+package Servlet;
+import java.io.IOException;
+import java.io.PrintWriter;
+import java.util.LinkedList;
+import java.util.ResourceBundle;
+
+import javax.servlet.RequestDispatcher;
+import javax.servlet.ServletException;
+import javax.servlet.http.HttpServlet;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.HttpSession;
+
+import Data.Account;
+import Data.Bid;
+import Data.EnglishAuction;
+import Handler.BidHandler;
+/**
+ * 
+ * This servlet is used to handle the backend logic of Bidding system.
+ * 
+ * @author Archit
+ * 
+ */
+
+public class BidServlet extends HttpServlet {
+	
+	
+EnglishAuction auction; //auction object is created
+ 	
+	private static final long serialVersionUID = 1L;
+	/**
+	 * 
+	 * This method is used to get the values from the session and these values are passed
+	 * on to the createNewBid method of BidHandler class.
+	 * 
+	 *  
+	 * @param request, response 
+	 * @return void
+	 * @throws ServletException , IOException
+	 * 
+	 * 	 */
+	public void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+		HttpSession session = request.getSession();  
+		String lang;
+		if(session==null || session.getAttribute("language") == null )
+			lang = "Language.lang_en_ca";
+		else
+			lang = session.getAttribute("language").toString();
+		ResourceBundle resource = ResourceBundle.getBundle(lang);
+		response.setContentType("text/html");
+		PrintWriter out = response.getWriter();
+		int acntId = ((Account)session.getAttribute("account")).getId(); //gets the account id of the user logged in
+		String userName = ((Account)session.getAttribute("account")).getUsername(); //gets the username.
+ 		String name = ((Account)session.getAttribute("account")).getName(); //gets the name of the user
+  		String getUrl = request.getHeader("referer"); //gets the current url
+  		int val = getUrl.indexOf('=');
+  		String q = null;
+  		if(val>0){
+  			q=getUrl.substring(val+1);
+  		}
+  		
+  		LinkedList<Bid> allBids = (LinkedList<Bid>) session.getAttribute("AllBids");
+  		
+  		int itemId = Integer.parseInt(q) ; //item id for which the bid is to  be placed
+		float value;
+		try {
+			value = Float.parseFloat(request.getParameter("bidPrice"));  //bidPrice is retreived from the request.
+		}catch(NumberFormatException e){
+			session.setAttribute("redirectLink", "/ArtAuction/EnglishAuctionServlet?auctid="+ itemId);
+			session.setAttribute("redirectMsg", resource.getString("invalidbidprice"));
+			RequestDispatcher rd = request.getRequestDispatcher("redirect.jsp");
+			rd.forward(request, response);
+			return;
+		}
+		
+		for(Bid bid : allBids){
+			if(value <= bid.getValue()){
+				session.setAttribute("redirectLink", "/ArtAuction/EnglishAuctionServlet?auctid="+ itemId);
+				session.setAttribute("redirectMsg", resource.getString("invalidbidprice"));
+				RequestDispatcher rd = request.getRequestDispatcher("redirect.jsp");
+				rd.forward(request, response);
+				return;
+			}
+		}
+		
+ 		BidHandler.createNewBid(acntId, itemId, value, userName, name); //values are passed on to the function
+ 		session.setAttribute("redirectLink", "/ArtAuction/EnglishAuctionServlet?auctid="+ itemId);
+		session.setAttribute("redirectMsg", resource.getString("redirectbid"));
+		RequestDispatcher rd = request.getRequestDispatcher("redirect.jsp");
+		rd.forward(request, response);
+ 
+	}//end of doPost
+}//end of class
